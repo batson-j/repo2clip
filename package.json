@@ -1,0 +1,108 @@
+{
+  "name": "repo2clip",
+  "displayName": "repo2clip",
+  "description": "Print directory structure file contents to clipboard for LLM consumption",
+  "version": "0.0.1",
+  "publisher": "YourPublisherName",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/repo2clip.git"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "clipboard",
+    "directory",
+    "llm",
+    "ai"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "repo2clip.copyStructureOnly",
+        "title": "Copy Repository Structure Only"
+      },
+      {
+        "command": "repo2clip.copyWorkspace",
+        "title": "Copy Complete Workspace"
+      },
+      {
+        "command": "repo2clip.copyWorkspaceSelected",
+        "title": "Copy Workspace (Selected Folder Contents)"
+      }
+    ],
+    "configuration": {
+      "title": "Repo2Clip",
+      "properties": {
+        "repo2clip.alwaysIncludedFiles": {
+          "type": "array",
+          "default": [
+            "readme.md",
+            "package.json",
+            "requirements.txt",
+            "pyproject.toml",
+            "cargo.toml",
+            "go.mod",
+            "gemfile",
+            "composer.json",
+            "build.gradle",
+            "pom.xml"
+          ],
+          "description": "Files that should always be included in full"
+        },
+        "repo2clip.maxFileSize": {
+          "type": "number",
+          "default": 1000000,
+          "description": "Maximum file size in bytes to include"
+        }
+      }
+    },
+    "menus": {
+      "explorer/context": [
+        {
+          "when": "explorerResourceIsFolder",
+          "command": "repo2clip.copyStructureOnly",
+          "group": "2_workspace"
+        },
+        {
+          "when": "explorerResourceIsFolder",
+          "command": "repo2clip.copyWorkspace",
+          "group": "2_workspace"
+        },
+        {
+          "when": "explorerResourceIsFolder",
+          "command": "repo2clip.copyWorkspaceSelected",
+          "group": "2_workspace"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.4.5",
+    "@types/vscode": "^1.80.0",
+    "@typescript-eslint/eslint-plugin": "^6.2.1",
+    "@typescript-eslint/parser": "^6.2.1",
+    "eslint": "^8.46.0",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "ignore": "^6.0.2"
+  }
+}
