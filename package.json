@@ -1,19 +1,18 @@
 {
   "name": "repo2clip",
   "displayName": "repo2clip",
-  "description": "Print directory structure file contents to clipboard for LLM consumption",
+  "description": "Repository Structure and File Content to Clipboard for LLMs",
   "version": "0.0.1",
-  "publisher": "YourPublisherName",
+  "publisher": "Jason Batson",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/yourusername/repo2clip.git"
-  },
+  "repository": {},
   "engines": {
     "vscode": "^1.80.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "AI",
+    "Chat"
   ],
   "keywords": [
     "clipboard",
@@ -26,25 +25,14 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "repo2clip.copyStructureOnly",
-        "title": "Copy Repository Structure Only"
-      },
-      {
-        "command": "repo2clip.copyWorkspace",
-        "title": "Copy Complete Workspace"
-      },
-      {
-        "command": "repo2clip.copyWorkspaceSelected",
-        "title": "Copy Workspace (Selected Folder Contents)"
-      }
-    ],
     "configuration": {
       "title": "Repo2Clip",
       "properties": {
-        "repo2clip.alwaysIncludedFiles": {
+        "repo2clip.alwaysIncluded": {
           "type": "array",
+          "items": {
+            "type": "string"
+          },
           "default": [
             "readme.md",
             "package.json",
@@ -57,12 +45,56 @@
             "build.gradle",
             "pom.xml"
           ],
-          "description": "Files that should always be included in full"
+          "description": "Patterns for files that should always be included in full, using .gitignore pattern syntax. These patterns take precedence over exclusions."
+        },
+        "repo2clip.alwaysExcluded": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/*.pyc",
+            "**/*.pyo",
+            "**/*.pyd",
+            "**/*.so",
+            "**/*.dll",
+            "**/*.dylib",
+            "**/*.class",
+            "**/*.exe",
+            "**/.DS_Store",
+            "**/Thumbs.db",
+            "**/desktop.ini",
+            "**/package-lock.json",
+            "**/yarn.lock",
+            "**/pnpm-lock.yaml",
+            "**/*.lock",
+            "**/.env.*",
+            "**/.idea/**",
+            "**/.vscode/**",
+            "**/*.swp",
+            "**/*.swo",
+            "**/node_modules/**",
+            "**/__pycache__/**",
+            "**/.git/**",
+            "**/.svn/**",
+            "**/.hg/**",
+            "**/.next/**",
+            "**/dist/**",
+            "**/build/**",
+            "**/target/**",
+            "**/out/**",
+            "**/coverage/**",
+            "**/venv/**",
+            "**/.venv/**",
+            "**/env/**",
+            "**/.env/**"
+          ],
+          "description": "Patterns for files and directories that should be excluded, using .gitignore pattern syntax. These are combined with .gitignore rules."
         },
         "repo2clip.maxFileSize": {
           "type": "number",
           "default": 1000000,
-          "description": "Maximum file size in bytes to include"
+          "description": "Maximum file size in bytes to include in the output"
         }
       }
     },

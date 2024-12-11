@@ -3,7 +3,6 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 import { GitignoreHandler } from "./gitignore";
-import { DEFAULT_EXCLUDE_DIRS, DEFAULT_EXCLUDE_FILES } from "./constants";
 import { DirectoryResult, FileInfo, ProcessingOptions } from "../types";
 import { getConfiguration } from "../config/settings";
 
@@ -12,35 +11,6 @@ export function shouldExclude(
   gitignoreHandler: GitignoreHandler,
   basePath: string
 ): boolean {
-  const name = path.basename(filepath);
-  const isDirectory = fs.statSync(filepath).isDirectory();
-
-  // Check if it's in our default exclude lists
-  if (isDirectory && DEFAULT_EXCLUDE_DIRS.has(name)) {
-    return true;
-  }
-
-  if (!isDirectory) {
-    // Check exact matches
-    if (DEFAULT_EXCLUDE_FILES.has(name)) {
-      return true;
-    }
-
-    // Check pattern matches (like *.pyc)
-    for (const pattern of DEFAULT_EXCLUDE_FILES) {
-      if (pattern.includes("*")) {
-        const regex = new RegExp(
-          "^" + pattern.replace(/\./g, "\\.").replace(/\*/g, ".*") + "$",
-          "i"
-        );
-        if (regex.test(name)) {
-          return true;
-        }
-      }
-    }
-  }
-
-  // Check gitignore patterns
   return gitignoreHandler.isIgnored(filepath, basePath);
 }
 
@@ -104,18 +74,15 @@ export function getDirectoryStructure(
       const prefix = isLast ? "└──" : "├──";
       output += `${indent}${prefix} 📄 ${file}\n`;
 
-      // Only include file contents if specified in options
       if (options.includeContents) {
+        const filePath = path.join(currentPath, file);
         const shouldIncludeContent =
-          // Include if it's in the target directory (if specified)
           !options.targetDirectory ||
           currentPath.startsWith(options.targetDirectory) ||
-          // Or if it's in the always included files list
-          config.alwaysIncludedFiles.includes(file.toLowerCase());
+          gitignoreHandler.isIncluded(filePath, startPath);
 
         if (shouldIncludeContent) {
           try {
-            const filePath = path.join(currentPath, file);
             const stats = fs.statSync(filePath);
             if (stats.size <= config.maxFileSize) {
               const content = fs.readFileSync(filePath, "utf-8");

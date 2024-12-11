@@ -2,6 +2,7 @@
 import * as path from "path";
 import { DirectoryResult, FileInfo } from "../types";
 import { getConfiguration } from "../config/settings";
+import ignore from "ignore";
 
 export function formatOutput(
   result: DirectoryResult,
@@ -15,28 +16,36 @@ export function formatOutput(
   const regularFiles: FileInfo[] = [];
 
   result.files.forEach((file) => {
-    if (
-      config.alwaysIncludedFiles.includes(
-        path.basename(file.path).toLowerCase()
-      )
-    ) {
+    const relativePath = path.relative(basePath, file.path);
+    const ig = ignore().add(config.alwaysIncluded);
+    if (ig.ignores(relativePath)) {
       priorityFiles.push(file);
     } else {
       regularFiles.push(file);
     }
   });
 
-  // Sort priority files to ensure README.md is first
+  // Sort priority files: README.md first, then maintain config order
   priorityFiles.sort((a, b) => {
-    const aName = path.basename(a.path).toLowerCase();
-    const bName = path.basename(b.path).toLowerCase();
-    if (aName === "readme.md") {
+    const aPath = path.relative(basePath, a.path);
+    const bPath = path.relative(basePath, b.path);
+
+    // README.md always comes first
+    if (aPath.toLowerCase().endsWith("readme.md")) {
       return -1;
     }
-    if (bName === "readme.md") {
+    if (bPath.toLowerCase().endsWith("readme.md")) {
       return 1;
     }
-    return aName.localeCompare(bName);
+
+    // For other files, maintain the order from config
+    const aMatchIndex = config.alwaysIncluded.findIndex((pattern) =>
+      ignore().add(pattern).ignores(aPath)
+    );
+    const bMatchIndex = config.alwaysIncluded.findIndex((pattern) =>
+      ignore().add(pattern).ignores(bPath)
+    );
+    return aMatchIndex - bMatchIndex;
   });
 
   // Add priority files

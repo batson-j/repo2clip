@@ -16,6 +16,12 @@ export interface ProcessingOptions {
 }
 
 export interface ExtensionConfig {
-  alwaysIncludedFiles: string[];
+  alwaysIncluded: string[];
+  alwaysExcluded: string[];
   maxFileSize: number;
+}
+
+export interface IgnoreResult {
+  isIgnored: boolean;
+  source?: "gitignore" | "settings" | "both";
 }

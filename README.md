@@ -20,20 +20,24 @@ Provides the full directory structure of your workspace but only includes file c
 - File contents are included only for:
   - Files in the selected folder
   - Files in all subfolders of the selected folder
-  - Priority files (like README.md, package.json) from anywhere in the workspace
+  - Files matching your `alwaysIncluded` patterns
 
-For example, if you select `src/features/auth/`:
+## Installation
 
-- You'll see the structure of your entire project
-- You'll get the contents of all files under `src/features/auth/` and its subfolders
-- You'll still get contents of priority files like README.md from the root
-- Other folders' contents will be omitted
+### Requirements
 
-This is particularly useful when:
+- Visual Studio Code 1.80.0 or higher
+- Node.js 16.x or higher
+- npm 7.x or higher
 
-- Working on a specific feature but need to show its context within the larger project
-- Sharing a module's implementation while maintaining visibility of project structure
-- Focusing on a particular area while keeping priority configuration files accessible
+### Installation Steps
+
+1. Open VS Code
+2. Open Command Palette (`Ctrl+Shift+P` or `Cmd+Shift+P`)
+3. Type "Extensions: Install from VSIX..."
+4. Select the repo2clip.vsix file
+
+Or install from the VS Code Marketplace [coming soon]
 
 ## Usage
 
@@ -51,64 +55,180 @@ Right-click on any folder in the Explorer to access Repo2Clip commands.
 
 ## Configuration
 
-Customize the extension through VS Code settings:
+### Basic Configuration
 
-```json
+```jsonc
 {
-  "repo2clip.alwaysIncludedFiles": [
+  // Files to always include (using .gitignore pattern syntax)
+  "repo2clip.alwaysIncluded": [
     "readme.md",
-    "package.json",
-    "requirements.txt"
-    // Add your own priority files
+    "**/*.config.{js,json}",
+    "src/**/*.{ts,tsx}"
   ],
-  "repo2clip.maxFileSize": 1000000 // Maximum file size in bytes to include
+
+  // Files to always exclude
+  "repo2clip.alwaysExcluded": [
+    "**/node_modules/**",
+    "**/*.test.{ts,js}",
+    "**/dist/**"
+  ],
+
+  // Maximum file size in bytes
+  "repo2clip.maxFileSize": 1000000
 }
 ```
 
-### Default Priority Files
+### Pattern Matching
 
-The following files are always included when using "Copy Workspace" or "Copy Selected":
+Repo2Clip uses .gitignore pattern syntax for both inclusion and exclusion rules. Patterns are matched against file paths relative to the workspace root.
 
-- readme.md
-- package.json
-- requirements.txt
-- pyproject.toml
-- cargo.toml
-- go.mod
-- gemfile
-- composer.json
-- build.gradle
-- pom.xml
+#### Pattern Syntax
 
-## Excluded Files and Directories
+- `*` matches any characters except `/`
+- `**` matches any characters including `/`
+- `?` matches a single character except `/`
+- `!` negates a pattern
+- `/` matches directory separators
+- Lines starting with `#` are comments
 
-By default, the extension ignores common files and directories that typically don't provide useful context:
+#### Pattern Examples
 
-### Directories
+```jsonc
+{
+  "repo2clip.alwaysIncluded": [
+    // Documentation
+    "**/*.md", // All markdown files
+    "docs/**/*.{md,txt}", // All docs in markdown or text
 
-- node_modules
-- .git
-- dist
-- build
-- And other common build/dependency directories
+    // Configuration
+    "**/config.*", // Any config file
+    "**/*.config.{js,json,ts}", // All config files with specific extensions
 
-### Files
+    // Source code
+    "src/**/*.{ts,tsx}", // All TypeScript files under src
+    "!src/**/*.test.ts", // Exclude test files
 
-- .DS_Store
-- package-lock.json
-- \*.pyc
-- And other common system/lock files
+    // API definitions
+    "api/**/*.{yaml,json}", // All API specs
 
-The extension also respects your project's `.gitignore` file.
+    // Important project files
+    "package.json",
+    "**/tsconfig.json"
+  ]
+}
+```
 
-## Installation
+### Priority and Conflict Resolution
 
-1. Open VS Code
-2. Open Command Palette
-3. Type "Extensions: Install from VSIX..."
-4. Select the repo2clip.vsix file
+1. Include/Exclude Priority:
 
-Or install from the VS Code Marketplace [coming soon]
+   - `alwaysIncluded` patterns take highest precedence
+   - `.gitignore` and `alwaysExcluded` patterns are combined
+   - When conflicts occur, inclusion wins and a warning is shown
+
+2. File Order:
+   - README.md files always appear first
+   - Other included files appear in the order of matching patterns
+   - Regular files appear after the directory structure
+
+### Default Patterns
+
+#### Default Included Files
+
+```jsonc
+[
+  "readme.md",
+  "package.json",
+  "requirements.txt",
+  "pyproject.toml",
+  "cargo.toml",
+  "go.mod",
+  "gemfile",
+  "composer.json",
+  "build.gradle",
+  "pom.xml"
+]
+```
+
+#### Default Excluded Patterns
+
+```jsonc
+[
+  // Build artifacts
+  "**/*.pyc",
+  "**/*.exe",
+  "**/*.dll",
+  "**/*.so",
+
+  // System files
+  "**/.DS_Store",
+  "**/Thumbs.db",
+
+  // Dependencies
+  "**/node_modules/**",
+  "**/venv/**",
+
+  // Build outputs
+  "**/dist/**",
+  "**/build/**"
+
+  // Full list in package.json
+]
+```
+
+## Best Practices
+
+1. **Pattern Organization**
+
+   - Group patterns by purpose (docs, config, source, etc.)
+   - Use comments to explain complex patterns
+   - Start with more specific patterns before general ones
+
+2. **Performance**
+
+   - Be specific with include patterns to avoid processing unnecessary files
+   - Use `maxFileSize` to prevent large file processing
+   - Consider using `Copy Workspace (Selected Folder Contents)` for large repos
+
+3. **Security**
+   - Review copied content before sharing with LLMs
+   - Add sensitive file patterns to `alwaysExcluded`
+   - Use `.gitignore` in conjunction with extension patterns
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Files Not Being Included**
+
+   - Check pattern syntax
+   - Verify file isn't matched by exclude patterns
+   - Check file size against `maxFileSize`
+
+   ```jsonc
+   // Make pattern more specific
+   "repo2clip.alwaysIncluded": ["src/specific/path/**/*.ts"]
+   ```
+
+2. **Performance Issues**
+
+   - Reduce scope of include patterns
+   - Increase exclude patterns
+   - Use selected folder copy instead of complete workspace
+
+   ```jsonc
+   // Optimize patterns
+   "repo2clip.alwaysExcluded": ["**/node_modules/**", "**/dist/**"]
+   ```
+
+3. **Pattern Conflicts**
+   - Review warning messages
+   - Make patterns more specific
+   - Check pattern order in arrays
+   ```jsonc
+   // Fix conflicts
+   "repo2clip.alwaysIncluded": ["src/**/*.ts", "!src/**/*.test.ts"]
+   ```
 
 ## Use with LLMs
 
@@ -124,24 +244,18 @@ Can you help me understand...
 
 The extension formats output to be easily readable by both humans and LLMs, with clear separation between directory structure and file contents.
 
-## Contributing
-
-1. Clone the repository
-2. `npm install`
-3. Open in VS Code and press F5 to start debugging
-4. Make your changes
-5. Submit a Pull Request
-
 ## License
 
-MIT License - see LICENSE.txt for details
+[MIT License](LICENSE.txt)
 
 ## Release Notes
 
 ### 0.0.1
 
 - Initial release
-- Basic directory structure copying
-- Workspace and selected folder content copying
+- Pattern-based file inclusion/exclusion
+- Gitignore integration
 - Priority file handling
-- Gitignore support
+- Conflict detection and warning system
+- Directory structure visualization
+- Selected folder content support
