@@ -28,6 +28,20 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "commands": [
+      {
+        "command": "repo2clip.copyStructureOnly",
+        "title": "Repo2Clip: Copy Repository Structure Only"
+      },
+      {
+        "command": "repo2clip.copyWorkspace",
+        "title": "Repo2Clip: Copy Complete Workspace"
+      },
+      {
+        "command": "repo2clip.copyWorkspaceSelected",
+        "title": "Repo2Clip: Copy Workspace (Selected Folder Contents)"
+      }
+    ],
     "configuration": {
       "title": "Repo2Clip",
       "properties": {
