@@ -3,9 +3,12 @@
   "displayName": "repo2clip",
   "description": "Repository Structure and File Content to Clipboard for LLMs",
   "version": "0.0.1",
-  "publisher": "Jason Batson",
+  "publisher": "blujay",
   "license": "MIT",
-  "repository": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/batson-j/repo2clip"
+  },
   "engines": {
     "vscode": "^1.80.0"
   },
