@@ -2,7 +2,7 @@
   "name": "repo2clip",
   "displayName": "repo2clip",
   "description": "Repository Structure and File Content to Clipboard for LLMs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "blujay",
   "license": "MIT",
   "repository": {
